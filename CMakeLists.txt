@@ -31,27 +31,27 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
 endif()
 
 # For git users, attempt to generate a more useful version string
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
-  find_package(Git QUIET REQUIRED)
-  execute_process(COMMAND
-          "${GIT_EXECUTABLE}" --git-dir=${CMAKE_CURRENT_SOURCE_DIR}/.git describe --tags
-          RESULT_VARIABLE
-              GIT_VERSION_RESULT
-          ERROR_VARIABLE
-              GIT_VERSION_ERROR
-          OUTPUT_VARIABLE
-              GIT_VERSION
-          OUTPUT_STRIP_TRAILING_WHITESPACE)
-  if (${GIT_VERSION_RESULT})
-    # Don't issue warning if we aren't the master project;
-    # just assume that whoever included us knows the version they are getting
-    if (WABT_MASTER_PROJECT)
-      message(WARNING "${GIT_VERSION_ERROR} Error running git describe to determine version")
-    endif()
-  else ()
-    set(CMAKE_PROJECT_VERSION "${CMAKE_PROJECT_VERSION} (${GIT_VERSION})")
-  endif ()
-endif ()
+# if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
+#   find_package(Git QUIET REQUIRED)
+#   execute_process(COMMAND
+#           "${GIT_EXECUTABLE}" --git-dir=${CMAKE_CURRENT_SOURCE_DIR}/.git describe --tags
+#           RESULT_VARIABLE
+#               GIT_VERSION_RESULT
+#           ERROR_VARIABLE
+#               GIT_VERSION_ERROR
+#           OUTPUT_VARIABLE
+#               GIT_VERSION
+#           OUTPUT_STRIP_TRAILING_WHITESPACE)
+#   if (${GIT_VERSION_RESULT})
+#     # Don't issue warning if we aren't the master project;
+#     # just assume that whoever included us knows the version they are getting
+#     if (WABT_MASTER_PROJECT)
+#       message(WARNING "${GIT_VERSION_ERROR} Error running git describe to determine version")
+#     endif()
+#   else ()
+#     set(CMAKE_PROJECT_VERSION "${CMAKE_PROJECT_VERSION} (${GIT_VERSION})")
+#   endif ()
+# endif ()
 
 if (NOT "${CMAKE_PROJECT_VERSION}")
   set(CMAKE_PROJECT_VERSION ${PROJECT_VERSION})
@@ -337,16 +337,16 @@ set(WABT_LIBRARY_SRC
   src/wat-writer.cc
 
   # TODO(binji): Move this into its own library?
-  src/interp/binary-reader-interp.h
-  src/interp/binary-reader-interp.cc
-  src/interp/interp.h
-  src/interp/interp.cc
-  src/interp/interp-inl.h
-  src/interp/interp-math.h
-  src/interp/interp-util.h
-  src/interp/interp-util.cc
-  src/interp/istream.h
-  src/interp/istream.cc
+  # src/interp/binary-reader-interp.h
+  # src/interp/binary-reader-interp.cc
+  # src/interp/interp.h
+  # src/interp/interp.cc
+  # src/interp/interp-inl.h
+  # src/interp/interp-math.h
+  # src/interp/interp-util.h
+  # src/interp/interp-util.cc
+  # src/interp/istream.h
+  # src/interp/istream.cc
 )
 
 add_library(wabt STATIC ${WABT_LIBRARY_SRC})
@@ -368,7 +368,9 @@ endif ()
 
 # libwasm, which implenents the wasm C API
 if (BUILD_LIBWASM)
-  add_library(wasm SHARED ${WABT_LIBRARY_SRC} src/interp/interp-wasm-c-api.cc)
+  add_library(wasm SHARED ${WABT_LIBRARY_SRC}
+   # src/interp/interp-wasm-c-api.cc
+   )
   target_link_libraries(wasm wabt)
   target_include_directories(wasm PUBLIC third_party/wasm-c-api/include)
   if (COMPILER_IS_MSVC)
