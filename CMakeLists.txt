@@ -107,9 +107,14 @@ if (WIN32)
   check_symbol_exists(ENABLE_VIRTUAL_TERMINAL_PROCESSING "windows.h" HAVE_WIN32_VT100)
 endif ()
 
-include(CheckTypeSize)
-check_type_size(ssize_t SSIZE_T)
-check_type_size(size_t SIZEOF_SIZE_T)
+if(NOT EMSCRIPTEN)
+  include(CheckTypeSize)
+  check_type_size(ssize_t SSIZE_T)
+  check_type_size(size_t SIZEOF_SIZE_T)
+else()
+  set(SSIZE_T 4)
+  set(SIZEOF_SIZE_T 4)
+endif()
 
 configure_file(
   ${WABT_SOURCE_DIR}/src/config.h.in
@@ -693,41 +698,41 @@ if (BUILD_TOOLS OR BUILD_TESTS)
   endif ()
 endif ()
 
-if (EMSCRIPTEN)
-  # flags for all emscripten builds
+# if (EMSCRIPTEN)
+#   # flags for all emscripten builds
 
-  # exceptions are never needed
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
+#   # exceptions are never needed
+#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
 
-  # wabt.js
+#   # wabt.js
 
-  # just dump everything into one binary so we can reference it from JavaScript
-  add_definitions(-Wno-warn-absolute-paths)
-  add_executable(libwabtjs src/emscripten-helpers.cc)
-  add_dependencies(everything libwabtjs)
-  target_link_libraries(libwabtjs wabt)
-  set_target_properties(libwabtjs PROPERTIES OUTPUT_NAME libwabt)
+#   # just dump everything into one binary so we can reference it from JavaScript
+#   add_definitions(-Wno-warn-absolute-paths)
+#   add_executable(libwabtjs src/emscripten-helpers.cc)
+#   add_dependencies(everything libwabtjs)
+#   target_link_libraries(libwabtjs wabt)
+#   set_target_properties(libwabtjs PROPERTIES OUTPUT_NAME libwabt)
 
-  set(WABT_POST_JS ${WABT_SOURCE_DIR}/src/wabt.post.js)
-  set(EMSCRIPTEN_EXPORTED_JSON ${WABT_SOURCE_DIR}/src/emscripten-exported.json)
+#   set(WABT_POST_JS ${WABT_SOURCE_DIR}/src/wabt.post.js)
+#   set(EMSCRIPTEN_EXPORTED_JSON ${WABT_SOURCE_DIR}/src/emscripten-exported.json)
 
-  set(LIBWABT_LINK_FLAGS
-    -s SINGLE_FILE
-    --post-js ${WABT_POST_JS}
-    -s EXPORTED_FUNCTIONS=\"@${EMSCRIPTEN_EXPORTED_JSON}\"
-    -s RESERVED_FUNCTION_POINTERS=10
-    -s NO_EXIT_RUNTIME=1
-    -s ALLOW_MEMORY_GROWTH=1
-    -s MODULARIZE=1
-    -s EXPORT_NAME=\"'WabtModule'\"
-    -s WASM=0
-    -Oz
-  )
-  string(REPLACE ";" " " LIBWABT_LINK_FLAGS_STR "${LIBWABT_LINK_FLAGS}")
+#   set(LIBWABT_LINK_FLAGS
+#     -s SINGLE_FILE
+#     --post-js ${WABT_POST_JS}
+#     -s EXPORTED_FUNCTIONS=\"@${EMSCRIPTEN_EXPORTED_JSON}\"
+#     -s RESERVED_FUNCTION_POINTERS=10
+#     -s NO_EXIT_RUNTIME=1
+#     -s ALLOW_MEMORY_GROWTH=1
+#     -s MODULARIZE=1
+#     -s EXPORT_NAME=\"'WabtModule'\"
+#     -s WASM=0
+#     -Oz
+#   )
+#   string(REPLACE ";" " " LIBWABT_LINK_FLAGS_STR "${LIBWABT_LINK_FLAGS}")
 
-  set_target_properties(libwabtjs
-    PROPERTIES
-    LINK_FLAGS "${LIBWABT_LINK_FLAGS_STR}"
-    LINK_DEPENDS "${WABT_POST_JS};${EMSCRIPTEN_EXPORTED_JSON}"
-  )
-endif ()
+#   set_target_properties(libwabtjs
+#     PROPERTIES
+#     LINK_FLAGS "${LIBWABT_LINK_FLAGS_STR}"
+#     LINK_DEPENDS "${WABT_POST_JS};${EMSCRIPTEN_EXPORTED_JSON}"
+#   )
+# endif ()
